@@ -1,6 +1,7 @@
+import sys
 
 import evince_dbus
-from urllib import pathname2url, url2pathname
+from urllib.request import pathname2url, url2pathname
 import dbus.mainloop.glib
 import vim
 import time
@@ -21,6 +22,8 @@ class TeXNineSyncTeX(evince_dbus.EvinceWindowProxy):
     # Backward search: Evince -> Vim
     def source_handler_vim(self, input_file, source_link, timestamp):
         input_file = self._uri_to_path(input_file)
+        if sys.version_info.major > 2:
+            input_file = input_file.decode(sys.getfilesystemencoding())
         input_file = input_file.replace(' ', '\ ')
         row = source_link[0]
         try:

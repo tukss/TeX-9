@@ -65,12 +65,9 @@ else:
 # TODO: Python 3 support
 if config['synctex']:
     if int(vim.eval("has('gui_running')")):
-        if not int(vim.eval("has('python3')")): 
-            logging.debug("TeX-9: Importing tex_nine_synctex") 
-            # NB: Important side effect: Vim will be hooked to the DBus session daemon
-            import tex_nine_synctex
-        else:
-            echoerr("Must not have +python3 when using SyncTeX.")
+        logging.debug("TeX-9: Importing tex_nine_synctex")
+        # NB: Important side effect: Vim will be hooked to the DBus session daemon
+        import tex_nine_synctex
     else:
         echomsg("SyncTeX not available in terminal.")
 
@@ -371,8 +368,8 @@ class TeXNineOmni(TeXNineBibTeX):
             return labels
 
         labels, included = zip(*match)
-        labels = filter(None, labels)
-        included = filter(None, included)
+        labels = [_f for _f in labels if _f]
+        included = [_f for _f in included if _f]
 
         labels = [dict(word=i, menu=basename) for i in labels]
         for fname in included:
@@ -388,7 +385,7 @@ class TeXNineOmni(TeXNineBibTeX):
                                             f.read()) 
                     inc_labels = [dict(word=i, menu=fname) for i in inc_labels] 
                     labels += inc_labels
-            except IOError, e:
+            except IOError as e:
                 # Do not raise an error because the \include statement might
                 # be commented
                 logging.debug(str(e).decode('string_escape'))
@@ -472,7 +469,7 @@ class TeXNineOmni(TeXNineBibTeX):
                 elif 'includegraphics' in self.keyword:
                     compl = self._pics()
 
-        except TeXNineError, e:
+        except TeXNineError as e:
             echoerr("Omni completion failed: "+str(e))
             compl = []
 
@@ -603,7 +600,7 @@ class TeXNineDocument(TeXNineBase, TeXNineSnippets):
                 evince_proxy = tex_nine_synctex.TeXNineSyncTeX(target,
                                                                logging) 
                 self.buffers[vimbuffer.name]['synctex'] = evince_proxy
-            except TeXNineError, NameError:
+            except TeXNineError as NameError:
                 return
 
         s = self.buffers[vimbuffer.name]['synctex']
@@ -658,7 +655,7 @@ class TeXNineDocument(TeXNineBase, TeXNineSnippets):
 
             return self.buffers[vimbuffer.name]['compiler']
 
-        except TeXNineError, e:
+        except TeXNineError as e:
             echoerr(e)
             return ""
         except KeyError:
@@ -671,7 +668,7 @@ class TeXNineDocument(TeXNineBase, TeXNineSnippets):
         """
 
         valid_entry = lambda x: int(x['valid']) and not ignored.search(x['text'])
-        qflist = filter(valid_entry, vim.eval('getqflist()'))
+        qflist = list(filter(valid_entry, vim.eval('getqflist()')))
 
         # Add BibTeX errors
         while self.biberrors:
@@ -693,7 +690,7 @@ class TeXNineDocument(TeXNineBase, TeXNineSnippets):
             output = self.get_master_output(vimbuffer)
             cmd = '{0} "{1}" &> /dev/null &'.format(config['viewer']['app'], output)
             subprocess.call(cmd, shell=True)
-        except TeXNineError, e:
+        except TeXNineError as e:
             echoerr("Cannot determine the output file: "+str(e))
 
     def insert_skeleton(self, vimbuffer, skeleton_file):
