@@ -295,7 +295,8 @@ class TeXNineBibTeX(TeXNineBase):
                     b = ( bibtemp if path.exists(bibtemp) else b )
                     # Get the path with kspewhich
                     proc = subprocess.Popen(['kpsewhich','-must-exist', b],
-                                            stdout=subprocess.PIPE)
+                                            stdout=subprocess.PIPE,
+                                            universal_newlines=True)
                     bibpath = proc.communicate()[0].strip('\n')
                     # kpsewhich return either the full path or an empty
                     # string.
@@ -621,7 +622,8 @@ class TeXNineDocument(TeXNineBase, TeXNineSnippets):
         tex_cmd = [compiler, '-output-directory='+cwd,
                    '-interaction=batchmode', basename]
         bib_cmd = ['bibtex', basename[:-len('.tex')]+'.aux']
-        kwargs = {'stdout': subprocess.PIPE, 'cwd': cwd}
+        kwargs = {'stdout': subprocess.PIPE, 'cwd': cwd,
+                  'universal_newlines': True}
 
         subprocess.Popen(tex_cmd, **kwargs).wait()
         stdout, stderr = subprocess.Popen(bib_cmd, **kwargs).communicate() 

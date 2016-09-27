@@ -27,8 +27,8 @@
 "
 "************************************************************************
 
-if !has('python') 
-    echoerr "TeX-9: a Vim installation with +python is required"
+if !has('python') && ! has('python3')
+    echoerr "TeX-9: a Vim installation with +python or +python3 is required"
     finish
 endif
 
